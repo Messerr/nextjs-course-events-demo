@@ -1,12 +1,12 @@
+import Head from "next/head";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 
-import { getFilteredEvents } from "../../helpers/api-util";
+import { useEffect, useState } from "react";
 import EventList from "../../components/events/EventList";
 import ResultsTitle from "../../components/events/ResultsTitle";
 import Button from "../../components/UI/Button";
 import ErrorAlert from "../../components/UI/error-alert";
-import { useEffect, useState } from "react";
 
 const FilteredEventsPage = (props) => {
   const [loadedEvents, setLoadedEvents] = useState();
@@ -14,7 +14,10 @@ const FilteredEventsPage = (props) => {
 
   const filterData = router.query.slug;
 
-  const {data, error } = useSWR("https://nextjs-rendering-6ed07-default-rtdb.firebaseio.com/events.json", (url) => fetch(url).then(res => res.json()))
+  const { data, error } = useSWR(
+    "https://nextjs-rendering-6ed07-default-rtdb.firebaseio.com/events.json",
+    (url) => fetch(url).then((res) => res.json())
+  );
 
   useEffect(() => {
     if (data) {
@@ -31,15 +34,37 @@ const FilteredEventsPage = (props) => {
     }
   }, [data]);
 
-  if (!loadedEvents) {
-    return <p className="center">Loading...</p>;
-  }
+  let pageHeadData = <Head>
+          <title>Filtered Events</title>
+      <meta
+        name="description"
+        content="A list of filtered events."
+      />
+  </Head>;
 
+  if (!loadedEvents) {
+    return (
+      <>
+        {pageHeadData}
+        <p className="center">Loading...</p>
+      </>
+    );
+  }
   const filteredYear = filterData[0];
   const filteredMonth = filterData[1];
 
   const numYear = +filteredYear;
   const numMonth = +filteredMonth;
+
+  pageHeadData = (
+    <Head>
+      <title>Filtered Events</title>
+      <meta
+        name="description"
+        content={`All events for ${numMonth}/${numYear}.`}
+      />
+    </Head>
+  );
 
   if (
     isNaN(numYear) ||
@@ -52,6 +77,7 @@ const FilteredEventsPage = (props) => {
   ) {
     return (
       <>
+        {pageHeadData}
         <ErrorAlert>
           <p>Invalid filter. Please adjust your values!</p>
         </ErrorAlert>
@@ -73,6 +99,7 @@ const FilteredEventsPage = (props) => {
   if (!filteredEvents || filteredEvents.length === 0) {
     return (
       <>
+        {pageHeadData}
         <ErrorAlert>
           <p>No events found for the chosen filter!</p>
         </ErrorAlert>
@@ -87,6 +114,7 @@ const FilteredEventsPage = (props) => {
 
   return (
     <>
+      {pageHeadData}
       <ResultsTitle date={date} />
       <EventList items={filteredEvents} />
     </>
