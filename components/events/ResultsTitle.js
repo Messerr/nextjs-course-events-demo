@@ -1,6 +1,7 @@
 import Button from '../UI/Button';
 import classes from './results-title.module.css';
 
+
 function ResultsTitle(props) {
   const { date } = props;
 
